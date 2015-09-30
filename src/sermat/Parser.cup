@@ -1,0 +1,128 @@
+package sermat.parser;
+
+import java.io.*;
+import java.util.*;
+import java_cup.runtime.Symbol;
+import java.lang.String;
+
+parser code {:
+
+	private final Map<String, Object> bindings = new HashMap<String, Object>();
+		
+	public void setBinding(String id, Object obj){
+		if(id.charAt(0) != '$'){
+			throw new Error("Invalid binding identifier" + "'id'");
+		}
+		if(bindings.containsKey(id)){
+			throw new Error("'"+ id +"'" +  "is already bound"); 
+		}
+		bindings.put(id, obj);
+	}
+	
+	public Object getBinding(String id){
+		if(bindings.containsKey(id)){
+			return bindings.get(id);
+		}
+		
+		throw new Error("'"+ id +"'" + "is not bound");		
+	}
+	
+	public void syntax_error(Symbol currentToken) {
+		report_error("Syntax error at [" + (currentToken.left+1) +"," + (currentToken.right+1) +"]!", null);
+	}
+
+	public static Symbol parse(Reader input) throws Exception {
+		return (new Parser(new Lexer(input))).parse();
+	}
+
+	public static Symbol parse(String input) throws Exception {
+		return parse(new StringReader(input));
+	}
+
+	public static void main(String[] args) throws Exception {
+		if (args.length < 1) {
+			System.out.println(parse(new InputStreamReader(System.in, "UTF8")).value);
+		} else for (int i = 0; i < args.length; ++i) {
+			System.out.println(parse(new InputStreamReader(new FileInputStream(args[i]), "UTF8")).value);
+		}
+	}
+
+:}
+
+
+non terminal Map<String, Object> members;
+non terminal List<Object> elements;
+non terminal Object value;
+
+terminal COMMA;
+terminal LEFT_PAR;
+terminal RIGHT_PAR;
+terminal COLON;
+terminal LEFT_BRACE;
+terminal RIGHT_BRACE;
+terminal LEFT_BRACK;
+terminal RIGHT_BRACK;
+terminal EQUALS;
+terminal NUM;
+terminal String ID;
+terminal Boolean TRUE;
+terminal Boolean FALSE;
+terminal Object NULL;
+terminal String STR;
+
+precedence left ID, EQUALS, STR;
+precedence left LEFT_BRACE, RIGHT_BRACE;
+precedence left RIGHT_BRACK, COMMA;
+
+start with value;
+
+value ::=
+		LEFT_BRACE RIGHT_BRACE
+		{: RESULT = new HashMap<String,Object>(); :}
+	|	LEFT_BRACE members:$1 RIGHT_BRACE
+		{: RESULT = $1; :}
+	|	LEFT_BRACK RIGHT_BRACK
+		{: RESULT = new ArrayList<Object>(); :}
+	|	LEFT_BRACK elements:$1 RIGHT_BRACK
+		{: RESULT = $1; :}
+	|	TRUE
+		{: RESULT = true; :}
+	|	FALSE 
+		{: RESULT = false; :}
+	|	NUM:$1
+		{: RESULT = Double.valueOf((String)$1); :}
+	|	NULL
+		{: RESULT = null; :}
+	|	STR:$1
+		{: RESULT = $1.substring(1,$1.length()-1); :}
+	|	ID:$0 EQUALS value: $1
+		{: parser.setBinding($0, $1); RESULT = $1; :}
+	|	ID:$1
+		{: RESULT = parser.getBinding($1); :}
+;
+
+members ::=
+		members:$0 COMMA STR:$1 COLON value:$2 
+		{: RESULT = $0; RESULT.put($1, $2); :}
+	|	members:$0 COMMA ID:$1 COLON value:$2 
+		{: RESULT = $0; RESULT.put($1, $2); :}
+	|	STR:$1 COLON value:$2
+		{: RESULT = new HashMap<String, Object>(); RESULT.put($1, $2); :}
+	|	ID:$1 COLON value:$2
+		{: RESULT = new HashMap<String, Object>(); RESULT.put($1, $2); :}
+	/*|	STR:$1 COLON ID
+		{: RESULT = true ; :}
+	|	ID:$1 COLON ID
+		{: RESULT = true ; :}*/
+;
+
+elements ::=
+		value:$1
+		{: RESULT = new ArrayList<Object>(); RESULT.add($1); :}
+	|	elements:$0 COMMA value:$1
+		{: RESULT = $0; RESULT.add($1); :}
+;
+
+/*binding ::=
+		ID EQUALS value: $1
+;*/

@@ -1,0 +1,11 @@
+//src/sermat/Parser.cup/cup-compact-red=false
+//src/sermat/Parser.cup/cup-debug=false
+//src/sermat/Parser.cup/cup-expected-conflicts=0
+//src/sermat/Parser.cup/cup-no-positions=false
+//src/sermat/Parser.cup/cup-no-scanner=false
+//src/sermat/Parser.cup/cup-non-terms=false
+//src/sermat/Parser.cup/cup-output=src
+//src/sermat/Parser.cup/cup-parser-class=Parser
+//src/sermat/Parser.cup/cup-symbols-class=Tokens
+//src/sermat/Parser.cup/cup-symbols-if=true
+eclipse.preferences.version=1
