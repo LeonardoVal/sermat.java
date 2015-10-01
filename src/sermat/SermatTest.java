@@ -80,7 +80,7 @@ public class SermatTest extends TestCase {
 		
 		try {
 			sermat.serialize(list);
-			fail("Should have thrown an IllegalArgumentException");
+			fail("Should have thrown an Exception");
 		} catch (Exception e) {
 			assertEquals("Repeated list!", e.getMessage());
 		}
@@ -112,21 +112,28 @@ public class SermatTest extends TestCase {
 		str = "{Data: [], Object: {}}";
 		assertEquals("{Data:[],Object:{}}", sermat.serialize(sermat.materialize(str)));
 		
-		str = "{a:10 /* block comment*/ }";
+		str = "{a:10 /* block \n comment*/ }";
 		assertEquals("{a:10.0}", sermat.serialize(sermat.materialize(str)));		
 	}
 	
 	public void testBinding() throws Exception{
 		Map<String, Object> obj1 = new HashMap<String, Object>(); 
 		obj1.put("a", 7); 
-		List<Object> list1 = new ArrayList<Object>();
-		list1.add(obj1);
-		list1.add(obj1);
+		List<Object> list = new ArrayList<Object>();
+		list.add(obj1);
+		list.add(obj1);
 		String str = "$0=[$1={a:7},$1]";
-		assertEquals(str, sermat.serialize(list1,sermat.BINDING_MODE));
+		assertEquals(str, sermat.serialize(list,sermat.BINDING_MODE));
 		
 		obj1.put("b", obj1);
-		// Binding exception
+		try {
+			sermat.serialize(list, sermat.BINDING_MODE);
+			fail("Should have thrown an Exception");
+		} catch (Exception e) {
+			assertEquals("Sermat.serialize: Circular reference detected!", e.getMessage());
+		}
+		
+		// Add Materialize Test
 		
 	}
 	
@@ -143,6 +150,8 @@ public class SermatTest extends TestCase {
 		obj1.put("b", obj1);
 		str = "$0=[$1={b:$1,a:7},$1]";
 		assertEquals(str, sermat.serialize(list1,sermat.CIRCULAR_MODE));
+		
+		//Add Materialize Test
 	}
 	
 	// Sermat.serialize(Sermat.materialize("$0={a:$1={x:7},b:$1}", {mode: Sermat.BINDING_MODE}))

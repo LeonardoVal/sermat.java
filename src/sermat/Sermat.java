@@ -54,7 +54,7 @@ public class Sermat {
 		if(value == null){
 			return "null";
 		}
-		throw new Error("Serialize Error");
+		throw new Exception("Serialize Error");
 	}
 	
 	public String serialize(Object value) throws Exception{
@@ -75,14 +75,13 @@ public class Sermat {
 		switch(mode){
 			case DEFAULT_MODE:
 				if (context.isVisited(value)) {
-					throw new Error("Repeated list!");				
+					throw new Exception("Repeated list!");				
 				}
 				context.addVisited(value);
 				break;
 			case BINDING_MODE:
 				if(context.parents.indexOf(value) >=0)
-					throw new Error("Sermat.serialize: Circular reference detected!");
-				System.out.println(context.bindings.get(key));
+					throw new Exception("Sermat.serialize: Circular reference detected!");
 				break;
 		}
 		if(mode == BINDING_MODE || mode == CIRCULAR_MODE){
@@ -128,7 +127,7 @@ public class Sermat {
 				break;
 			case BINDING_MODE:				
 				if(context.parents.indexOf(map) >=0)
-					throw new Error("Sermat.serialize: Circular reference detected!");
+					throw new Exception("Sermat.serialize: Circular reference detected!");
 				break;
 		}
 		
