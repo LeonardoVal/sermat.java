@@ -1,6 +1,5 @@
 package sermat;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -16,7 +15,8 @@ public class Sermat {
 	public static final int BINDING_MODE = 2;
 	public static final int CIRCULAR_MODE = 3;
 	
-	private static final Map<String, Construction> CONSTRUCTIONS = new HashMap<String, Construction>();
+	private static final Map<String, Construction<?>> CONSTRUCTIONS = new HashMap<String, Construction<?>>();
+	
 	//Sermat.java
 	//hash string(date) construccion
 // Serialization //////////////////////////////////////////////////////////
@@ -54,7 +54,24 @@ public class Sermat {
 		if(value == null){
 			return "null";
 		}
-		throw new Exception("Serialize Error");
+		
+		// value is instanceof Class
+		Class tClass = value.getClass();
+		if(!CONSTRUCTIONS.containsKey(tClass.getSimpleName())){
+			throw new Exception("Class is not defined!");
+		}else{
+			Construction constr = CONSTRUCTIONS.get(tClass.getSimpleName());
+			List<Object> attributes = constr.serializer(value);
+			String data = constr.identifier + "(";
+			for(Object o : attributes){
+				data+= "" + o + ",";
+			}
+			data = data.substring(0,data.length()-1);
+			
+			return data + ")";
+		}	
+		
+		//throw new Exception("Serialize Error");
 	}
 	
 	public String serialize(Object value) throws Exception{
@@ -100,7 +117,7 @@ public class Sermat {
 			}
 		}
 		context.parents.add(value);
-		for(Object o : (List)value) {
+		for(Object o : (List<?>)value) {
 			if(isBind)
 	        	result += ",";
 	        else
@@ -113,7 +130,8 @@ public class Sermat {
 		return isBind ? key : key+ "[" + result + "]";
 	}
 	private String mapSerialize(Object map, int mode, SerializationContext context) throws Exception{
-		Iterator it = ((Map<String, Construction>) map).entrySet().iterator();
+		@SuppressWarnings("unchecked")
+		Iterator<?> it = ((Map<String, Construction<?>>) map).entrySet().iterator();
 		String result = "";
 		int len = 0;
 		boolean isBind = false;
@@ -162,7 +180,7 @@ public class Sermat {
 	    return isBind ? key : key+ "{" + result + "}";
 	}
 	
-// Materialization ////////////////////////////////////////////////////////////7
+// Materialization ////////////////////////////////////////////////////////////
 	
 	public Object materialize(String code){
 		try {
@@ -173,8 +191,22 @@ public class Sermat {
 		}
 		return null;
 	}
-	
-	public void register(Construction construction){
+	/**
+	 * Register a construction. It can be use by serializer or materializer.
+	 * If the construction already exist then thrown an exception. 
+	 * @param construction
+	 * @throws Exception 
+	 */
+	public void register(Construction<?> construction) throws Exception{
+		if(CONSTRUCTIONS.containsKey(construction.identifier)){
+			throw new Exception("Construction already exist!");
+		}else{
+			CONSTRUCTIONS.put(construction.identifier, construction);
+		}
+		
+		/*var id = typeof type === 'function' ? identifier(type, true) : type +'';
+	return this.registry[id]
+		 * */
 		
 	}
 	

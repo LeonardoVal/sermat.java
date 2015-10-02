@@ -2,10 +2,12 @@ package sermat;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sermat.contructions.Point2D;
 import sermat.parser.*;
 
 public class Main {
@@ -13,12 +15,20 @@ public class Main {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		Sermat sermat = new Sermat();
+		Construction<Date> constrDate = new Construction<Date>("Date");
+		//constructionDate.serializer(new Date());		
+		Construction<Point2D> constrPoint2D = new Construction<Point2D>("Point2D");
+		//constructionPoint2D.serializer(new Point2D(10, 33));
 		
-		Object c00 = null;
-		System.out.println(sermat.serialize(c00));
+		sermat.register(constrDate);
+		sermat.register(constrPoint2D);
+		
+		System.out.println(sermat.serialize(new Date()));
+		System.out.println(sermat.serialize(new Point2D(10,33)));
+		
 		
 		/* SAME OBJECT */
-		Map<String, Object> obj1 = new HashMap<String, Object>(); 
+		/*Map<String, Object> obj1 = new HashMap<String, Object>(); 
 		obj1.put("a", 7); 
 		List<Object> list1 = new ArrayList<Object>();
 		list1.add(obj1);
@@ -36,7 +46,7 @@ public class Main {
 		
 		Object strMat = sermat.materialize("$0=[$1={a:7},$1]");
 		System.out.println(sermat.serialize(sermat.materialize("$0=[$1={a:7},$1]"),sermat.BINDING_MODE));
-		System.out.println(sermat.serialize(list1, sermat.CIRCULAR_MODE));
+		System.out.println(sermat.serialize(list1, sermat.CIRCULAR_MODE));*/
 		for (String line; (line = in.readLine()) != null ;) {
 			line = line.trim();
 			try {

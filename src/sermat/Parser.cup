@@ -9,7 +9,7 @@ parser code {:
 
 	private final Map<String, Object> bindings = new HashMap<String, Object>();
 		
-	public void setBinding(String id, Object obj){
+	public void putBinding(String id, Object obj){
 		if(id.charAt(0) != '$'){
 			throw new Error("Invalid binding identifier" + "'id'");
 		}
@@ -96,7 +96,7 @@ value ::=
 	|	STR:$1
 		{: RESULT = $1.substring(1,$1.length()-1); :}
 	|	ID:$0 EQUALS value: $1
-		{: parser.setBinding($0, $1); RESULT = $1; :}
+		{: parser.putBinding($0, $1); RESULT = $1; :}
 	|	ID:$1
 		{: RESULT = parser.getBinding($1); :}
 ;
