@@ -4,17 +4,18 @@ import java.io.*;
 import java.util.*;
 import java_cup.runtime.Symbol;
 import java.lang.String;
+import sermat.Construction;
 
 parser code {:
 
 	private final Map<String, Object> bindings = new HashMap<String, Object>();
 		
-	public void putBinding(String id, Object obj){
+	public void putBinding(String id, Object obj) throws Exception{
 		if(id.charAt(0) != '$'){
-			throw new Error("Invalid binding identifier" + "'id'");
+			throw new Exception("Invalid binding identifier" + "'id'");
 		}
 		if(bindings.containsKey(id)){
-			throw new Error("'"+ id +"'" +  "is already bound"); 
+			throw new Exception("'"+ id +"'" +  "is already bound"); 
 		}
 		bindings.put(id, obj);
 	}
@@ -99,6 +100,10 @@ value ::=
 		{: parser.putBinding($0, $1); RESULT = $1; :}
 	|	ID:$1
 		{: RESULT = parser.getBinding($1); :}
+	|	ID:$0 LEFT_PAR RIGHT_PAR
+		{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance(new Object[]{}), new Object[]{}); :}
+	|	ID:$0 LEFT_PAR elements:$1 RIGHT_PAR
+		{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance($1.toArray()), $1.toArray()); :}
 ;
 
 members ::=

@@ -1,6 +1,8 @@
 package sermat;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -10,86 +12,101 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Construction<T> {
-	public String identifier = "";
+import javax.swing.text.StyledEditorKit.BoldAction;
 
-	public Construction(String identifier){
-		this.identifier = identifier;
+import mylib.Point2D;
+
+public class Construction<T> {
+	public String identifier;
+	private String packageRoute;
+
+	public Construction(String identifier) {
+		if (identifier.equals("java.util.Date")) {
+			this.packageRoute = "java.util.Date";
+			this.identifier = "Date";
+		} else {
+			this.packageRoute = identifier;
+			this.identifier = identifier.substring(6,identifier.length());
+		}
 	}
-	public List<Object> serializer(T obj) throws Exception, Exception { // Date
+
+	public List<Object> serializer(T obj) throws Exception, Exception {
 		List<Object> attributes = new ArrayList<>();
 		Class tClass = obj.getClass();
 		String nameClass = tClass.getSimpleName();
-		switch(nameClass){
-			case "Date":
-				Calendar cal = Calendar.getInstance();
-			    cal.setTime((Date)obj);
-			    
-				attributes.add(cal.get(Calendar.YEAR));
-				attributes.add(cal.get(Calendar.MONTH));
-				attributes.add(cal.get(Calendar.DAY_OF_MONTH));
-				
-				attributes.add(cal.get(Calendar.HOUR));
-				attributes.add(cal.get(Calendar.MINUTE));
-				attributes.add(cal.get(Calendar.SECOND));
-				
-				break;
-			default:
-				List<String> methodsName = new ArrayList();
-				Method[] methods = tClass.getMethods(); //get publics methods
-				for (int i = 0; i < methods.length; i++) {
-					if (methods[i].getName().substring(0,3).equals("get")){
-						if(!methods[i].getName().equals("getClass"))
-							methodsName.add(methods[i].getName());
-						
-					}
-				}
-				Method method;
-				Class noparams[] = {};
-				for (String s : methodsName) {
-					method = obj.getClass().getDeclaredMethod(s, noparams);
-					//System.out.println("invoke " + s + " " + method.invoke(obj, null));
-					attributes.add(method.invoke(obj, null));
-				}
-				//System.out.println("length: " + methodsName.size());
-				break;
-		}
+		switch (nameClass) {
+		case "Date":
+			Calendar cal = Calendar.getInstance();
+			cal.setTime((Date) obj);
 
-		
-		
-		Method[] ff = obj.getClass().getDeclaredMethods();
-		
-		
-		//String dd = new String("pop");
-		
-		//System.out.println("" + obj.getClass().getDeclaredMethods());// .getDeclaredFields().length
-																	// + "\n");
-		
-		
-		
-		
-		/*for (Method f : ff) {
-			if (f.getName().substring(0, 3).equals("get")){
-				getMethods.add(f.getName());
-				//System.out.println(""+f.toGenericString());
-				//System.out.println(""+f.);
-			}
+			attributes.add(cal.get(Calendar.YEAR));
+			attributes.add(cal.get(Calendar.MONTH));
+			attributes.add(cal.get(Calendar.DAY_OF_MONTH));
+
+			attributes.add(cal.get(Calendar.HOUR));
+			attributes.add(cal.get(Calendar.MINUTE));
+			attributes.add(cal.get(Calendar.SECOND));
+
+			break;
+		default:
+			/*boolean serializeExist = false; 
+			List<String> methodsName = new ArrayList();
+			Method[] methods = tClass.getMethods(); // get publics methods
+			for (int i = 0; i < methods.length; i++) {
+				if(methods[i].getName().equals("serializer")){
+					serializeExist = true;
+				}
+			}*/
 			
-			/*System.out.println("" + " " + f.getName()); // get all gets
-			System.out.println("" + " " + f.getDeclaringClass());
-			int length = f.getParameterAnnotations().length;
-			System.out.println(length);
-		}*/
-		for(int i = 0; i< attributes.size(); i++){
-			System.out.println(""+attributes.get(i));
+			try{					
+				Class[] objparams = {obj.getClass()};
+				Method method = obj.getClass().getDeclaredMethod("serializer", objparams);
+				attributes = (List<Object>) method.invoke(obj, obj);
+			}catch(Exception e){
+				throw new Exception("Serializer method undefined on class " + obj.getClass().getSimpleName());
+			}
+			break;
 		}
-		
-		System.out.println("##########################");
 		return attributes;
 	}
 
-	public T materializer(T obj, Object[] args) {
-		return null;
+	public T materializer(T obj, Object[] args) throws Exception {
+		try{					
+			Class[] objparams = {obj.getClass(), args.getClass()};
+			Object[] objMaterializeParams = {obj,args};
+			
+			Method[] methods = obj.getClass().getMethods(); // get publics methods
+			System.out.print(methods.length);
+			for (int i = 0; i < methods.length; i++) {
+				System.out.println(methods[i].getName());
+			}
+			Method method = obj.getClass().getDeclaredMethod("materializer", objparams);
+			
+			return (T) method.invoke(obj, objMaterializeParams);
+		}catch(Exception e){
+			throw new Exception("Materializer method undefined on class " + obj.getClass().getSimpleName());
+		}
+	}
+
+	public T getNewInstance(Object[] args) throws ReflectiveOperationException {
+		Class integerDefinition = Class.forName(packageRoute);
+		Constructor intArgsConstructor;
+		if (args == null) {
+			intArgsConstructor = integerDefinition.getConstructor();
+			return (T) intArgsConstructor.newInstance();
+		} else {
+			Class[] classes = new Class[args.length];
+			for (int i = 0; i < args.length; i++) {
+				if (args[i] instanceof Boolean)
+					classes[i] = boolean.class;
+				if (args[i] instanceof Number) {
+					classes[i] = int.class;
+					args[i] = ((Double) args[i]).intValue();
+				}
+			}
+			intArgsConstructor = integerDefinition.getConstructor(classes);
+			return (T) intArgsConstructor.newInstance(args);
+		}
 	}
 
 	public boolean _bool(Object n) {

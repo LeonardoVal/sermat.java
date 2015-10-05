@@ -1,6 +1,7 @@
 package sermat;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,9 +16,12 @@ public class Sermat {
 	public static final int BINDING_MODE = 2;
 	public static final int CIRCULAR_MODE = 3;
 	
-	private static final Map<String, Construction<?>> CONSTRUCTIONS = new HashMap<String, Construction<?>>();
+	public static final Map<String, Construction<?>> CONSTRUCTIONS = new HashMap<String, Construction<?>>();
 	
-	//Sermat.java
+	public Sermat (){
+		CONSTRUCTIONS.put("Date", new Construction<>("java.util.Date")); // constructions defined by default
+	}
+
 	//hash string(date) construccion
 // Serialization //////////////////////////////////////////////////////////
 	
@@ -57,10 +61,8 @@ public class Sermat {
 		
 		// value is instanceof Class
 		Class tClass = value.getClass();
-		if(!CONSTRUCTIONS.containsKey(tClass.getSimpleName())){
-			throw new Exception("Class is not defined!");
-		}else{
-			Construction constr = CONSTRUCTIONS.get(tClass.getSimpleName());
+		if(CONSTRUCTIONS.containsKey(tClass.getSimpleName()) || CONSTRUCTIONS.containsKey("mylib."+tClass.getSimpleName())){
+			Construction constr = CONSTRUCTIONS.containsKey(tClass.getSimpleName()) ? CONSTRUCTIONS.get(tClass.getSimpleName()):CONSTRUCTIONS.get("mylib."+tClass.getSimpleName());
 			List<Object> attributes = constr.serializer(value);
 			String data = constr.identifier + "(";
 			for(Object o : attributes){
@@ -69,6 +71,8 @@ public class Sermat {
 			data = data.substring(0,data.length()-1);
 			
 			return data + ")";
+		}else{			
+			throw new Exception("Class is not defined!");
 		}	
 		
 		//throw new Exception("Serialize Error");
@@ -183,6 +187,12 @@ public class Sermat {
 // Materialization ////////////////////////////////////////////////////////////
 	
 	public Object materialize(String code){
+		if(code.startsWith("mylib.")){ //could be a Construction
+			code = code.substring(6,code.length());
+		}
+		if(code.startsWith("java.util.")){ //could be a Construction
+			code = code.substring(10,code.length());
+		}
 		try {
 			return Parser.parse(code).value;
 		} catch (Exception e) {
@@ -203,11 +213,6 @@ public class Sermat {
 		}else{
 			CONSTRUCTIONS.put(construction.identifier, construction);
 		}
-		
-		/*var id = typeof type === 'function' ? identifier(type, true) : type +'';
-	return this.registry[id]
-		 * */
-		
 	}
 	
 	public boolean remove(String identifier){

@@ -1,13 +1,14 @@
 package sermat;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import sermat.contructions.Point2D;
+import mylib.Point2D;
 import sermat.parser.*;
 
 public class Main {
@@ -15,18 +16,19 @@ public class Main {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		
 		Sermat sermat = new Sermat();
-		Construction<Date> constrDate = new Construction<Date>("Date");
-		//constructionDate.serializer(new Date());		
-		Construction<Point2D> constrPoint2D = new Construction<Point2D>("Point2D");
-		//constructionPoint2D.serializer(new Point2D(10, 33));
+		sermat.register(new Construction<Point2D>("mylib.Point2D"));
 		
-		sermat.register(constrDate);
-		sermat.register(constrPoint2D);
-		
+		/*System.out.println(new Date().getClass());
 		System.out.println(sermat.serialize(new Date()));
 		System.out.println(sermat.serialize(new Point2D(10,33)));
+		System.out.println(sermat.materialize("Date()"));*/
+		//System.out.println(sermat.materialize("Date(2015.0,9.0,4.0,10,22,50)"));
+		System.out.println(sermat.materialize("mylib.Point2D(31,24)"));
 		
 		
+		//System.out.println(sermat.materialize(sermat.serialize(new Point2D(10,33))));
+		
+		//System.out.println(sermat.materialize(sermat.serialize(new Date())));
 		/* SAME OBJECT */
 		/*Map<String, Object> obj1 = new HashMap<String, Object>(); 
 		obj1.put("a", 7); 
@@ -47,7 +49,7 @@ public class Main {
 		Object strMat = sermat.materialize("$0=[$1={a:7},$1]");
 		System.out.println(sermat.serialize(sermat.materialize("$0=[$1={a:7},$1]"),sermat.BINDING_MODE));
 		System.out.println(sermat.serialize(list1, sermat.CIRCULAR_MODE));*/
-		for (String line; (line = in.readLine()) != null ;) {
+		/*for (String line; (line = in.readLine()) != null ;) {
 			line = line.trim();
 			try {
 				if (line.length() > 0) {
@@ -56,30 +58,12 @@ public class Main {
 					//Object code = sermat.materialize(line);
 					
 					System.out.println(sermat.serialize(line, sermat.DEFAULT_MODE));
-					
-					/*
-					 PRUEBAS:
-					 []
-					 [{}]
-					 [Infinity,NaN,null]
-					 ["apple",1 ,3.4, true]
-					 [{"a": 7}, 77, {"a": 7}]
 					 
-					 {}
-					 {"Data": [],"Object": {}}
-					 {"a":10 /*put me as a comment* }
-					 {"Name":"user", "Age":10, "Gender": "F"}
-					 [{"Name":["firstname", "lastname"], "Age": Infinity, "Gender": "F"}]
-					 
-					 {"$menu": { "id": "file", "value": "File", "popup": { "menuitem": [ {"value": "New", "onclick": "CreateNewDoc()"}, {"value": "Open", "onclick": "OpenDoc()"},   {"value": "Close", "onclick": "CloseDoc()"}     ]   } }}
-					 { "firstName": "John",  "lastName": "Smith",  "isAlive": true,  "age": 25,  "address": { "streetAddress": "21 2nd Street", "city": "New York", "state": "NY",   "postalCode": 100213100  },  "phoneNumbers": [ {  "type": "home",  "number": "212 555-1234" },  { "type": "office", "number": "646 555-4567" }],  "children": [], "spouse": null}
-					  
-					 */
 					
 				}
 			} catch (Exception err) {
 				System.err.println(err);
 			}
-		}
+		}*/
 	}
 }
