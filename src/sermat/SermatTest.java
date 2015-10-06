@@ -188,9 +188,15 @@ public class SermatTest extends TestCase {
 		}*/
 		Date date = new Date(Date.UTC(2015, 9, 4, 10, 22, 50));
 		assertEquals(date, sermat.materialize("Date(2015,9,4,10,22,50)"));
+		
+		List<Object> list = new ArrayList<Object>();
+		list.add(true);
+		list.add(33);
+		list.add(new Date(2015,9,6,0,0,0));
+		assertEquals("[true,33,Date(3915,9,6,0,0,0)]", sermat.serialize(list));
 	}
 	
-	public void testConstructionCustom(){
+	public void testConstructionCustom() throws Exception{
 		try{
 			sermat.serialize(new Point2D(10,33));
 			fail("Should register custom Construction");
@@ -216,6 +222,12 @@ public class SermatTest extends TestCase {
 		} catch (Exception e){
 			fail("Should have materialize custom Construction");			
 		}
+		
+		List<Object> list = new ArrayList<Object>();
+		list.add(true);
+		list.add(new Point2D(40,50));
+		list.add(new Date(2015,9,6,0,0,0));
+		assertEquals("[true,Point2D(40,50),Date(3915,9,6,0,0,0)]", sermat.serialize(list));
 	}
 	
 }
