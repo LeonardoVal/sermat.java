@@ -1,9 +1,13 @@
 package sermat;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import mylib.Point2D;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,10 +89,10 @@ public class SermatTest extends TestCase {
 			assertEquals("Repeated list!", e.getMessage());
 		}
 		
-
 		//REPEAT MODE
 		str = "[{a:7},{a:7}]";
 		assertEquals(str,sermat.serialize(list,Sermat.REPEAT_MODE));
+		
 		// DEFAUL MODE
 		list.clear();
 		obj1.clear();
@@ -135,6 +139,9 @@ public class SermatTest extends TestCase {
 		
 		// Add Materialize Test
 		
+		// Sermat.serialize(Sermat.materialize("$0={a:$1={x:7},b:$1}", {mode: Sermat.BINDING_MODE}))
+		// Sermat.materialize("{a:true, a:$0=[$1=[$2={a:7},$2],$1] , b:$3=[$4=[$5={a:7},$5],$4]}")
+		// Sermat.serialize(Sermat.materialize("$0={a:$1={a:7},b:$1}"),{mode: Sermat.BINDING_MODE})
 	}
 	
 	public void testCircular() throws Exception{
@@ -152,11 +159,64 @@ public class SermatTest extends TestCase {
 		assertEquals(str, sermat.serialize(list1,sermat.CIRCULAR_MODE));
 		
 		//Add Materialize Test
+	}		
+	
+	public void testConstructionDate() throws Exception{
+		Date now = new Date();
+		List<Integer> attributes = new ArrayList<>();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime((Date) now);
+		
+		attributes.add(cal.get(Calendar.YEAR));
+		attributes.add(cal.get(Calendar.MONTH));
+		attributes.add(cal.get(Calendar.DAY_OF_MONTH));
+		attributes.add(cal.get(Calendar.HOUR));
+		attributes.add(cal.get(Calendar.MINUTE));
+		attributes.add(cal.get(Calendar.SECOND));
+		
+		String expected = "Date(";
+		for(int i = 0; i < attributes.size(); i++){
+			expected += attributes.get(i) + ",";
+		}
+		expected = expected.substring(0, expected.length()-1) + ")";
+		assertEquals(expected, sermat.serialize(now));
+		/*try {
+			sermat.materialize("Date()");
+			fail("Should have show an Exception");
+		} catch (Exception e){
+			assertEquals("Wrong arguments for construction of Date", e.getMessage());
+		}*/
+		Date date = new Date(Date.UTC(2015, 9, 4, 10, 22, 50));
+		assertEquals(date, sermat.materialize("Date(2015,9,4,10,22,50)"));
 	}
 	
-	// Sermat.serialize(Sermat.materialize("$0={a:$1={x:7},b:$1}", {mode: Sermat.BINDING_MODE}))
-	// Sermat.materialize("{a:true, a:$0=[$1=[$2={a:7},$2],$1] , b:$3=[$4=[$5={a:7},$5],$4]}")
-	//Sermat.serialize(Sermat.materialize("$0={a:$1={a:7},b:$1}"),{mode: Sermat.BINDING_MODE})
-	//Sermat.serialize(new Date());
+	public void testConstructionCustom(){
+		try{
+			sermat.serialize(new Point2D(10,33));
+			fail("Should register custom Construction");
+		} catch (Exception e){
+			assertEquals("Class Point2D is not defined!", e.getMessage());
+		}
+		
+		try {
+			sermat.register(new Construction<Point2D>("mylib.Point2D"));
+			assertTrue(sermat.CONSTRUCTIONS.containsKey("Point2D"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should have register custom Construction");
+		}
+		
+		try{
+			assertEquals("Point2D(10,33)", sermat.serialize(new Point2D(10,33)));
+		} catch (Exception e){
+			fail("Should have serialize custom Construction");			
+		}
+		try{
+			assertEquals("Point2D(10,33)", sermat.serialize(sermat.materialize("Point2D(10,33)")));
+		} catch (Exception e){
+			fail("Should have materialize custom Construction");			
+		}
+	}
+	
 }
 

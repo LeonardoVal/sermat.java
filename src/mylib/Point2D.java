@@ -24,6 +24,6 @@ public class Point2D {
 	}
 
 	public Point2D materializer(Point2D obj, Object[]args) { 
-		return (Point2D) (args == null? args : new Point2D(((Double)args[0]).intValue(), ((Double)args[1]).intValue())); 
+		return (Point2D) (args == null? args : new Point2D(((Number) args[0]).intValue(), ((Number)args[1]).intValue())); 
 	} 
 }

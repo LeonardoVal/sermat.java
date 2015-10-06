@@ -28,6 +28,14 @@ parser code {:
 		throw new Error("'"+ id +"'" + "is not bound");		
 	}
 	
+	public <T> T materializer(String id, Object[] attributes) throws ReflectiveOperationException, Exception{
+		if(sermat.Sermat.CONSTRUCTIONS.containsKey(id)){
+			Construction<T> construction = (Construction<T>) sermat.Sermat.CONSTRUCTIONS.get(id);
+			return construction.materializer(construction.getNewInstance(attributes), attributes);
+		}else{
+			throw new Exception(id + " is not defined");
+		}
+	}
 	public void syntax_error(Symbol currentToken) {
 		report_error("Syntax error at [" + (currentToken.left+1) +"," + (currentToken.right+1) +"]!", null);
 	}
@@ -101,9 +109,9 @@ value ::=
 	|	ID:$1
 		{: RESULT = parser.getBinding($1); :}
 	|	ID:$0 LEFT_PAR RIGHT_PAR
-		{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance(new Object[]{}), new Object[]{}); :}
+		{: RESULT = parser.materializer($0, new Object[]{}); :} //{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance(new Object[]{}), new Object[]{}); :}
 	|	ID:$0 LEFT_PAR elements:$1 RIGHT_PAR
-		{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance($1.toArray()), $1.toArray()); :}
+		{: RESULT = parser.materializer($0, $1.toArray()); :}//{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance($1.toArray()), $1.toArray()); :}
 ;
 
 members ::=
@@ -127,7 +135,3 @@ elements ::=
 	|	elements:$0 COMMA value:$1
 		{: RESULT = $0; RESULT.add($1); :}
 ;
-
-/*binding ::=
-		ID EQUALS value: $1
-;*/

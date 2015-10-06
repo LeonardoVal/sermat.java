@@ -72,7 +72,7 @@ public class Sermat {
 			
 			return data + ")";
 		}else{			
-			throw new Exception("Class is not defined!");
+			throw new Exception("Class " + tClass.getSimpleName() + " is not defined!");
 		}	
 		
 		//throw new Exception("Serialize Error");
@@ -85,8 +85,7 @@ public class Sermat {
 		return this.serialize(value, mode, new SerializationContext());
 	}
 	
-	private String strSerialize(String str){
-		//str = str.substring(1, str.length()-1);		
+	private String strSerialize(String str){	
 		return "\\\"" + str + "\\\"";
 	}
 	private String listSerialize(Object value, int mode, SerializationContext context) throws Exception{
@@ -190,9 +189,9 @@ public class Sermat {
 		if(code.startsWith("mylib.")){ //could be a Construction
 			code = code.substring(6,code.length());
 		}
-		if(code.startsWith("java.util.")){ //could be a Construction
+		/*if(code.startsWith("java.util.")){ //could be a Construction
 			code = code.substring(10,code.length());
-		}
+		}*/
 		try {
 			return Parser.parse(code).value;
 		} catch (Exception e) {

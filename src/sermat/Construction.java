@@ -48,16 +48,7 @@ public class Construction<T> {
 			attributes.add(cal.get(Calendar.SECOND));
 
 			break;
-		default:
-			/*boolean serializeExist = false; 
-			List<String> methodsName = new ArrayList();
-			Method[] methods = tClass.getMethods(); // get publics methods
-			for (int i = 0; i < methods.length; i++) {
-				if(methods[i].getName().equals("serializer")){
-					serializeExist = true;
-				}
-			}*/
-			
+		default:		
 			try{					
 				Class[] objparams = {obj.getClass()};
 				Method method = obj.getClass().getDeclaredMethod("serializer", objparams);
@@ -71,18 +62,24 @@ public class Construction<T> {
 	}
 
 	public T materializer(T obj, Object[] args) throws Exception {
-		try{					
+		try{
+			if(identifier.equals("Date")){
+				return (T) new Date(Date.UTC(((Number)args[0]).intValue(), ((Number)args[1]).intValue(), ((Number)args[2]).intValue(), ((Number)args[3]).intValue(), ((Number)args[4]).intValue(), ((Number)args[5]).intValue()));
+			}
+		}catch(Exception e){
+			throw new Exception(" Wrong arguments for construction of " + obj.getClass().getSimpleName());
+		}
+		try{ // Customs construction
 			Class[] objparams = {obj.getClass(), args.getClass()};
 			Object[] objMaterializeParams = {obj,args};
 			
-			Method[] methods = obj.getClass().getMethods(); // get publics methods
-			System.out.print(methods.length);
-			for (int i = 0; i < methods.length; i++) {
+			Method[] methods = obj.getClass().getMethods(); // get publics methods			
+			/*for (int i = 0; i < methods.length; i++) {
 				System.out.println(methods[i].getName());
-			}
+			}*/
 			Method method = obj.getClass().getDeclaredMethod("materializer", objparams);
-			
-			return (T) method.invoke(obj, objMaterializeParams);
+			T tt = (T) method.invoke(obj, objMaterializeParams);
+			return tt;
 		}catch(Exception e){
 			throw new Exception("Materializer method undefined on class " + obj.getClass().getSimpleName());
 		}
@@ -97,18 +94,19 @@ public class Construction<T> {
 		} else {
 			Class[] classes = new Class[args.length];
 			for (int i = 0; i < args.length; i++) {
+				// Type of attributes accepted
 				if (args[i] instanceof Boolean)
 					classes[i] = boolean.class;
 				if (args[i] instanceof Number) {
 					classes[i] = int.class;
-					args[i] = ((Double) args[i]).intValue();
+					args[i] = ((Number) args[i]).intValue();
 				}
 			}
 			intArgsConstructor = integerDefinition.getConstructor(classes);
 			return (T) intArgsConstructor.newInstance(args);
 		}
 	}
-
+	
 	public boolean _bool(Object n) {
 		return true;
 	}
