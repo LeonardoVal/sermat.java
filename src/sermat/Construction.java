@@ -42,7 +42,6 @@ public class Construction<T> {
 			attributes.add(cal.get(Calendar.YEAR));
 			attributes.add(cal.get(Calendar.MONTH));
 			attributes.add(cal.get(Calendar.DAY_OF_MONTH));
-
 			attributes.add(cal.get(Calendar.HOUR));
 			attributes.add(cal.get(Calendar.MINUTE));
 			attributes.add(cal.get(Calendar.SECOND));

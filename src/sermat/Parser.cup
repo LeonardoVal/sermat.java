@@ -109,9 +109,9 @@ value ::=
 	|	ID:$1
 		{: RESULT = parser.getBinding($1); :}
 	|	ID:$0 LEFT_PAR RIGHT_PAR
-		{: RESULT = parser.materializer($0, new Object[]{}); :} //{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance(new Object[]{}), new Object[]{}); :}
+		{: RESULT = parser.materializer($0, new Object[]{}); :}
 	|	ID:$0 LEFT_PAR elements:$1 RIGHT_PAR
-		{: RESULT = parser.materializer($0, $1.toArray()); :}//{: Construction construction = sermat.Sermat.CONSTRUCTIONS.get($0); RESULT = construction.materializer(construction.getNewInstance($1.toArray()), $1.toArray()); :}
+		{: RESULT = parser.materializer($0, $1.toArray()); :}
 ;
 
 members ::=
@@ -123,10 +123,6 @@ members ::=
 		{: RESULT = new HashMap<String, Object>(); RESULT.put($1, $2); :}
 	|	ID:$1 COLON value:$2
 		{: RESULT = new HashMap<String, Object>(); RESULT.put($1, $2); :}
-	/*|	STR:$1 COLON ID
-		{: RESULT = true ; :}
-	|	ID:$1 COLON ID
-		{: RESULT = true ; :}*/
 ;
 
 elements ::=

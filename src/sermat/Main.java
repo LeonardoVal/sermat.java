@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import mylib.Point2D;
+import mylib.Point3D;
 import sermat.parser.*;
 
 public class Main {
@@ -17,10 +18,13 @@ public class Main {
 		
 		Sermat sermat = new Sermat();
 		sermat.register(new Construction<Point2D>("mylib.Point2D"));
+		sermat.register(new Construction<Point2D>("mylib.Point3D"));
 		
 		System.out.println(sermat.serialize(new Date()));
 		System.out.println(sermat.serialize(new Point2D(10,33)));
 		System.out.println(sermat.materialize("Date(2015,9,4,10,22,50)"));
+		System.out.println(sermat.serialize(new Point3D(22,11,true)));
+		System.out.println(sermat.materialize("Point3D(2,1,false)"));
 		//System.out.println(sermat.materialize("mylib.Point2D(31,24)"));
 		//System.out.println(sermat.materialize("Date()"));
 
