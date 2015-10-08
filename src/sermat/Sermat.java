@@ -19,7 +19,7 @@ public class Sermat {
 	public static final Map<String, Construction<?>> CONSTRUCTIONS = new HashMap<String, Construction<?>>();
 	
 	public Sermat (){
-		CONSTRUCTIONS.put("Date", new Construction<>("java.util.Date")); // constructions defined by default
+		CONSTRUCTIONS.put("Date", new Construction<Date>("java.util.Date")); // constructions defined by default
 	}
 
 	//hash string(date) construccion

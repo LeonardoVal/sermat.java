@@ -112,6 +112,10 @@ value ::=
 		{: RESULT = parser.materializer($0, new Object[]{}); :}
 	|	ID:$0 LEFT_PAR elements:$1 RIGHT_PAR
 		{: RESULT = parser.materializer($0, $1.toArray()); :}
+	|	STR:$0 LEFT_PAR RIGHT_PAR
+		{: RESULT = parser.materializer($0.substring(1,$0.length()-1), new Object[]{}); :}
+	|	STR:$0 LEFT_PAR elements:$1 RIGHT_PAR
+		{: RESULT = parser.materializer($0.substring(1,$0.length()-1), $1.toArray()); :}
 ;
 
 members ::=

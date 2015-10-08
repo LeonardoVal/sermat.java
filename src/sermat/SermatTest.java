@@ -158,6 +158,10 @@ public class SermatTest extends TestCase {
 		str = "$0=[$1={b:$1,a:7},$1]";
 		assertEquals(str, sermat.serialize(list1,sermat.CIRCULAR_MODE));
 		
+		obj1.put("b", list1);
+		str = "$0=[$1={b:$0,a:7},$1]";
+		assertEquals(str, sermat.serialize(list1,sermat.CIRCULAR_MODE));
+		
 		//Add Materialize Test
 	}		
 	
