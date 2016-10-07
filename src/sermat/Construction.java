@@ -1,63 +1,29 @@
 package sermat;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.text.StyledEditorKit.BoldAction;
-
-import mylib.Point2D;
+import java.util.*;
 
 public class Construction<T> {
-	public String identifier;
-	private String packageRoute;
+	public final String identifier;
+	//private String packageRoute;
 
 	public Construction(String identifier) {
-		if (identifier.equals("java.util.Date")) {
-			this.packageRoute = "java.util.Date";
-			this.identifier = "Date";
-		} else {
-			this.packageRoute = identifier;
-			this.identifier = identifier.substring(6,identifier.length());
-		}
+		this.identifier = identifier;
 	}
 
-	public List<Object> serializer(T obj) throws Exception, Exception {
+	public Object[] serializer(T obj) throws Exception {
+		//FIXME
 		List<Object> attributes = new ArrayList<>();
 		Class tClass = obj.getClass();
-		String nameClass = tClass.getSimpleName();
-		switch (nameClass) {
-		case "Date":
-			Calendar cal = Calendar.getInstance();
-			cal.setTime((Date) obj);
-
-			attributes.add(cal.get(Calendar.YEAR));
-			attributes.add(cal.get(Calendar.MONTH));
-			attributes.add(cal.get(Calendar.DAY_OF_MONTH));
-			attributes.add(cal.get(Calendar.HOUR));
-			attributes.add(cal.get(Calendar.MINUTE));
-			attributes.add(cal.get(Calendar.SECOND));
-
-			break;
-		default:		
-			try{					
-				Class[] objparams = {obj.getClass()};
-				Method method = obj.getClass().getDeclaredMethod("serializer", objparams);
-				attributes = (List<Object>) method.invoke(obj, obj);
-			}catch(Exception e){
-				throw new Exception("Serializer method undefined on class " + obj.getClass().getSimpleName());
-			}
-			break;
+		//String nameClass = tClass.getSimpleName();
+		try{					
+			Class[] objparams = {obj.getClass()};
+			Method method = obj.getClass().getDeclaredMethod("serializer", objparams);
+			attributes = (List<Object>) method.invoke(obj, obj);
+		}catch(Exception e){
+			throw new Exception("Serializer method undefined on class " + obj.getClass().getSimpleName());
 		}
-		return attributes;
+		return attributes.toArray(); //FIXME
 	}
 
 	public T materializer(T obj, Object[] args) throws Exception {
@@ -85,7 +51,8 @@ public class Construction<T> {
 	}
 
 	public T getNewInstance(Object[] args) throws ReflectiveOperationException {
-		Class integerDefinition = Class.forName(packageRoute);
+		return null;
+		/*FIXME
 		Constructor intArgsConstructor;
 		if (args == null) {
 			intArgsConstructor = integerDefinition.getConstructor();
@@ -104,21 +71,46 @@ public class Construction<T> {
 			intArgsConstructor = integerDefinition.getConstructor(classes);
 			return (T) intArgsConstructor.newInstance(args);
 		}
+		*/
 	}
 	
 	public boolean _bool(Object n) {
-		return true;
+		return true; //TODO
 	}
 
 	public int _int(Object n) {
-		return 0;
+		return ((Number)n).intValue();
 	}
 
 	public double _double(Object n) {
-		return 0.0;
+		return ((Number)n).doubleValue();
 	}
 
 	public String _str(Object s) {
-		return "";
+		return s.toString();
+	}
+	
+	// Default constructions ///////////////////////////////////////////////////
+	
+	public static final Construction<java.time.ZonedDateTime> DATE = new Construction<java.time.ZonedDateTime>("Date"){
+		@Override public Object[] serializer(java.time.ZonedDateTime obj) throws Exception {
+			return new Object[]{obj.getYear(), obj.getMonthValue(), obj.getDayOfMonth(),
+					obj.getHour(), obj.getMinute(), obj.getSecond() + 1.0e-9 * obj.getNano()};
+		}
+
+		@Override public java.time.ZonedDateTime materializer(java.time.ZonedDateTime obj, Object[] args) throws Exception {
+			//FIXME Check arguments.
+			double secs = _double(args[5]);
+			int intSecs = (int)secs;
+			int nanos = (intSecs - intSecs) * 1000000000;
+			return java.time.ZonedDateTime.of(_int(args[0]), _int(args[1]), _int(args[2]), 
+				_int(args[3]), _int(args[4]), intSecs, nanos, java.time.ZoneOffset.UTC);
+		}
+	};
+	
+	public static final Map<String, Construction<?>> DEFAULT_CONSTRUCTIONS;	static {
+		Map<String, Construction<?>> dcs = new HashMap<String, Construction<?>>();
+		dcs.put("Date", DATE);
+		DEFAULT_CONSTRUCTIONS = dcs;
 	}
 }

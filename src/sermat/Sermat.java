@@ -1,6 +1,7 @@
 package sermat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +20,7 @@ public class Sermat {
 	public static final Map<String, Construction<?>> CONSTRUCTIONS = new HashMap<String, Construction<?>>();
 	
 	public Sermat (){
-		CONSTRUCTIONS.put("Date", new Construction<Date>("java.util.Date")); // constructions defined by default
+		CONSTRUCTIONS.putAll(Construction.DEFAULT_CONSTRUCTIONS);
 	}
 
 	//hash string(date) construccion
@@ -63,7 +64,7 @@ public class Sermat {
 		Class tClass = value.getClass();
 		if(CONSTRUCTIONS.containsKey(tClass.getSimpleName()) || CONSTRUCTIONS.containsKey("mylib."+tClass.getSimpleName())){
 			Construction constr = CONSTRUCTIONS.containsKey(tClass.getSimpleName()) ? CONSTRUCTIONS.get(tClass.getSimpleName()):CONSTRUCTIONS.get("mylib."+tClass.getSimpleName());
-			List<Object> attributes = constr.serializer(value);
+			List<Object> attributes = Arrays.asList(constr.serializer(value)); //FIXME
 			String data = constr.identifier + "(";
 			for(Object o : attributes){
 				data+= "" + o + ",";
@@ -200,6 +201,7 @@ public class Sermat {
 		}
 		return null;
 	}
+	
 	/**
 	 * Register a construction. It can be use by serializer or materializer.
 	 * If the construction already exist then thrown an exception. 

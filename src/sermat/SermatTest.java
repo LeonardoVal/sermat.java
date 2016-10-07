@@ -158,45 +158,23 @@ public class SermatTest extends TestCase {
 		str = "$0=[$1={b:$1,a:7},$1]";
 		assertEquals(str, sermat.serialize(list1,sermat.CIRCULAR_MODE));
 		
-		obj1.put("b", list1);
-		str = "$0=[$1={b:$0,a:7},$1]";
-		assertEquals(str, sermat.serialize(list1,sermat.CIRCULAR_MODE));
-		
 		//Add Materialize Test
 	}		
 	
 	public void testConstructionDate() throws Exception{
-		Date now = new Date();
-		List<Integer> attributes = new ArrayList<>();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime((Date) now);
-		
-		attributes.add(cal.get(Calendar.YEAR));
-		attributes.add(cal.get(Calendar.MONTH));
-		attributes.add(cal.get(Calendar.DAY_OF_MONTH));
-		attributes.add(cal.get(Calendar.HOUR));
-		attributes.add(cal.get(Calendar.MINUTE));
-		attributes.add(cal.get(Calendar.SECOND));
-		
-		String expected = "Date(";
-		for(int i = 0; i < attributes.size(); i++){
-			expected += attributes.get(i) + ",";
-		}
-		expected = expected.substring(0, expected.length()-1) + ")";
+		java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
+		String expected = "Date("+ now.getYear() +","+ now.getMonthValue()
+			+","+ now.getDayOfMonth() +","+ now.getHour() +","+ now.getMinute()
+			+","+ (now.getSecond() + now.getNano() * 1e-9) +")";
 		assertEquals(expected, sermat.serialize(now));
-		/*try {
-			sermat.materialize("Date()");
-			fail("Should have show an Exception");
-		} catch (Exception e){
-			assertEquals("Wrong arguments for construction of Date", e.getMessage());
-		}*/
-		Date date = new Date(Date.UTC(2015, 9, 4, 10, 22, 50));
+
+		java.time.ZonedDateTime date = java.time.ZonedDateTime.of(2015, 9, 4, 10, 22, 50, 0, java.time.ZoneOffset.UTC);
 		assertEquals(date, sermat.materialize("Date(2015,9,4,10,22,50)"));
 		
 		List<Object> list = new ArrayList<Object>();
 		list.add(true);
 		list.add(33);
-		list.add(new Date(2015,9,6,0,0,0));
+		list.add(java.time.ZonedDateTime.of(2015, 9, 6, 0, 0, 0, 0, java.time.ZoneOffset.UTC));
 		assertEquals("[true,33,Date(3915,9,6,0,0,0)]", sermat.serialize(list));
 	}
 	

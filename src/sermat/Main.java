@@ -18,7 +18,7 @@ public class Main {
 		
 		Sermat sermat = new Sermat();
 		sermat.register(new Construction<Point2D>("mylib.Point2D"));
-		sermat.register(new Construction<Point3D>("mylib.Point3D"));
+		sermat.register(new Construction<Point2D>("mylib.Point3D"));
 		
 		System.out.println(sermat.serialize(new Date()));
 		System.out.println(sermat.serialize(new Point2D(10,33)));
@@ -45,7 +45,6 @@ public class Main {
 		Object strMat = sermat.materialize("$0=[$1={a:7},$1]");
 		System.out.println(sermat.serialize(sermat.materialize("$0=[$1={a:7},$1]"),sermat.BINDING_MODE));
 		System.out.println(sermat.serialize(list1, sermat.CIRCULAR_MODE));
-		
-		System.out.println(sermat.materialize("\"Point2D\"(2,1)"));
+
 	}
 }
